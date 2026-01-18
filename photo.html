@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+     <title>🦌</title>
+     <style>
+        .nav-item { 
+          padding: 14px 28px; 
+          color: #000000; 
+          font-size: 20px; 
+          letter-spacing: 0.1em; 
+          border-radius: 0; 
+          text-decoration: none;     
+        }
+      
+      .navbar {
+        display: flex;
+        justify-content: center; 
+        gap: 12px;
+        padding: 20px;
+        flex-wrap: wrap;
+      }
+
+      /* 1. 图片的外壳容器 */
+      .photo-container {
+          margin-right: 18px;
+          overflow: hidden;    /* 关键：裁掉放大出来的部分 */
+          display: inline-block;
+          vertical-align: top;
+          aspect-ratio: 4 / 3; 
+      }
+
+      /* 2. 图片初始状态 */
+      .gallery-img {
+          width: 100%; 
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.5s ease; /* 关键：设置 0.5 秒的平滑缩放动画 */
+          display: block;
+      }
+
+      #gallery {
+         margin: 0 10%;    /* 左右自动边距，实现居中 */
+      }
+
+      /* 3. 鼠标悬停时的放大效果 */
+      .photo-container:hover .gallery-img {
+          transform: scale(1.1); /* 放大 1.1 倍 */
+      }
+
+      /* 模态框背景（黑色半透明） */
+  .modal {
+    display: none;  
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.9);  
+    cursor: zoom-out;  
+}
+
+/* 弹出的图片样式 */
+.modal-content {
+  margin: auto;
+  display: block;
+  max-width: 90%;
+  max-height: 90%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);  
+  box-shadow: 0 0 20px rgba(255,255,255,0.2);
+}
+
+/* 关闭按钮 */
+.close {
+  position: absolute;
+  top: 20px;
+  right: 35px;
+  color: #f1f1f1;
+  font-size: 40px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+     </style>
+</head>
+<body>
+
+<header> <!-- On enlève class="logo.jpg" ici -->
+<div style="text-align: center;">
+    
+  <img src="images/logo.jpg" alt="Logo" class="deer-logo;center;" style="width:140px;height:100px">
+    <h1 class="name">LU</h1>
+    <div class="sub-title">
+      <span class="light-font">photography</span>
+    </div>
+
+  </div>
+
+     <nav class="navbar">
+            <a href="info.html" class="nav-item">Info</a>
+            <a href="photo.html" class="nav-item">Photography</a>
+            <a href="memoire.html" class="nav-item">Mémoire</a>
+        </nav>
+</header>
+
+<div id="gallery"></div>
+
+<div id="imageModal" class="modal">
+  <span class="close">&times;</span>
+  <img class="modal-content" id="fullImage">
+</div>
+
+<script>
+  const photo_addresses_dimension_2 = [
+    ['_DSC1603','_DSC0506', '_DSC0971','_DSC1496'],
+    ['_DSC1626','_DSC0344','_DSC1612','_DSC1794','_DSC1633'],
+    ['_DSC0407','_DSC1021','_DSC1452','_DSC1485'],
+    ['_DSC0706','_DSC2017','_DSC2026','_DSC2234','16']
+]
+ 
+  function create_photo(addresse, container_width) {
+    let container = document.createElement('div');
+    container.className = 'photo-container';
+    container.style.width = container_width + 'px';
+    console.log('container width:', container.style.width);
+    console.log('container marginRight:', container.style.marginRight);
+    const photo_width = container_width ;
+    let photo = document.createElement('img');
+    photo.src = `images/${addresse}.jpg`;
+    photo.className = 'gallery-img'; 
+    photo.style.width = photo_width + 'px';
+    photo.loading = "lazy"; 
+    photo.onclick = function() {
+        // if (typeof openModal === "function") {
+            openModal(this.src);
+        // }
+    }
+    container.appendChild(photo);
+    console.log('photo width:', photo.style.width);
+    return container; 
+}
+
+  function create_row(addresses,row_width) {
+    const row = document.createElement('div');
+    row.style.marginBottom = '20px'; // Added 5px margin below
+    row.style.width = row_width + 'px';
+    const nb_photo = addresses.length;
+    const tmp = document.createElement('div');
+    tmp.className = 'photo-container';
+     // Put it in the DOM so computed styles apply reliably
+    tmp.style.position = 'absolute';
+    tmp.style.visibility = 'hidden';
+    tmp.style.pointerEvents = 'none';
+    document.body.appendChild(tmp);
+    const mr = parseFloat(getComputedStyle(tmp).marginRight);
+    console.log('marginRight *****:', mr);
+    
+    const container_width = (row_width - nb_photo * mr) / nb_photo;
+    const photos = addresses.map(address => create_photo(address, container_width));
+    photos.forEach(photo => {row.appendChild(photo)}); 
+    console.log('row_width:', row_width);
+    return row;
+  }  
+
+  function create_gallery(addresses_dimension_2) {
+    const gallery = document.getElementById('gallery');
+    // const style = getComputedStyle(gallery);
+    // const bodyWidth = document.body.getBoundingClientRect().width;
+    // const row_width = bodyWidth - parseFloat(style.marginLeft) - parseFloat(style.marginRight);
+    // console.log('bodyWidth:', bodyWidth);
+    // console.log('gallery marginLeft:', style.marginLeft);
+    // console.log('gallery marginRight:', style.marginRight);
+    // console.log('gallery width:', style.width);
+      const row_width = gallery.getBoundingClientRect().width;
+    addresses_dimension_2.forEach(addresses => {
+      const row = create_row(addresses, row_width);
+      gallery.appendChild(row);
+    });
+    return gallery;
+  }
+
+  create_gallery(photo_addresses_dimension_2);
+
+  const modal = document.getElementById("imageModal");
+  const fullImg = document.getElementById("fullImage");
+
+  function openModal(src) {
+      modal.style.display = "block";
+      fullImg.src = src;
+  }
+
+  modal.onclick = function() {
+      modal.style.display = "none";
+  }
+
+</script>
+
+</body>
+</html>
